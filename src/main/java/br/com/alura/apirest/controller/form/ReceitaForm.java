@@ -52,4 +52,13 @@ public class ReceitaForm {
 	public Receita converter() {
 		return new Receita(descricao, valor, Utils.fromString(data));
 	}
+	
+	public Receita atualizar(Receita receitaBanco) {
+		
+		receitaBanco.setDescricao(this.descricao);
+		receitaBanco.setValor(this.valor);
+		receitaBanco.setData(Utils.fromString(data));
+		
+		return receitaBanco;
+	}
 }

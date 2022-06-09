@@ -73,6 +73,10 @@ public class Receita {
 	}
 
 	private boolean isMesmoMes(Receita receita) {
+		if(this.id == receita.getId()) {
+			return false;
+		}
+		
 		if(this.data.getYear() != (receita.getData().getYear())) {
 			return false;
 		}

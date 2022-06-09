@@ -1,20 +1,26 @@
 package br.com.alura.apirest.config.validation;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import br.com.alura.apirest.exception.ReceitaDuplicadaNoMesException;
+
 @RestControllerAdvice
-public class ValidationHandler {
+public class ValidationHandler{
 
 	@Autowired
 	private MessageSource messageSource;
@@ -33,5 +39,17 @@ public class ValidationHandler {
 
 		return dto;
 	}
+	
+    @ExceptionHandler(ReceitaDuplicadaNoMesException.class)
+    public ResponseEntity<?> handleResourceNotFoundException(ReceitaDuplicadaNoMesException rdnme, HttpServletRequest request) {
+
+        ErrorDetail errorDetail = new ErrorDetail();
+        errorDetail.setTimestamp(new Date().getTime());
+        errorDetail.setStatus(HttpStatus.BAD_REQUEST.value());
+        errorDetail.setTitle("Erro na validação de receita.");
+        errorDetail.setDetail(rdnme.getMessage());
+
+        return new ResponseEntity<>(errorDetail, null, HttpStatus.BAD_REQUEST);
+    }
 
 }

@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -58,6 +59,26 @@ public class ReceitaController {
 			return ResponseEntity.ok(new ReceitaDTO(receita.get()));
 		}
 
+		return ResponseEntity.notFound().build();
+	}
+	
+	@PutMapping("/{id}")
+	@Transactional
+	public ResponseEntity<ReceitaDTO> atualizar(@PathVariable Long id, @RequestBody @Valid ReceitaForm form) throws ReceitaDuplicadaNoMesException {
+		Optional<Receita> receitaOptional = receitaRepository.findById(id);
+		if (receitaOptional.isPresent()) {
+			
+			Receita receitaForm = form.converter();
+			receitaForm.setId(id);
+			
+			if(receitaForm.isDuplicada(receitaRepository)) {
+				throw new ReceitaDuplicadaNoMesException("Já existe uma receita com a mesma descrição para o mês selecionado.");
+			}
+			
+			Receita receita = form.atualizar(receitaOptional.get());
+			return ResponseEntity.ok(new ReceitaDTO(receita));
+		}
+		
 		return ResponseEntity.notFound().build();
 	}
 }
