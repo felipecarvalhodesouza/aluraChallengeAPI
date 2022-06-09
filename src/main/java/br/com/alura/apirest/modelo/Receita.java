@@ -18,6 +18,16 @@ public class Receita {
 	private String descricao;
 	private BigDecimal valor;
 	private LocalDate data;
+	
+	public Receita() {
+		
+	}
+	
+	public Receita(String descricao,BigDecimal valor, LocalDate data) {
+		this.descricao = descricao;
+		this.valor = valor;
+		this.data = data;
+	}
 
 	public long getId() {
 		return id;
