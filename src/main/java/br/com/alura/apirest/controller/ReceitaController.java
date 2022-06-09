@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import br.com.alura.apirest.controller.form.ReceitaForm;
+import br.com.alura.apirest.exception.ReceitaDuplicadaNoMesException;
 import br.com.alura.apirest.modelo.Receita;
 import br.com.alura.apirest.repository.ReceitaRepository;
 
@@ -26,8 +27,12 @@ public class ReceitaController {
 
 	@PostMapping
 	@Transactional
-	public ResponseEntity<Receita> inserir(@RequestBody @Valid ReceitaForm form, UriComponentsBuilder uriBuilder) {
+	public ResponseEntity<Receita> inserir(@RequestBody @Valid ReceitaForm form, UriComponentsBuilder uriBuilder) throws ReceitaDuplicadaNoMesException {
 		Receita receita = form.converter();
+		
+		if(receita.isDuplicada(receitaRepository)) {
+			throw new ReceitaDuplicadaNoMesException("Já existe uma receita com a mesma descrição para o mês selecionado.");
+		}
 
 		receitaRepository.save(receita);
 

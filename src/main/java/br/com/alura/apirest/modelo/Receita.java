@@ -2,11 +2,14 @@ package br.com.alura.apirest.modelo;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+
+import br.com.alura.apirest.repository.ReceitaRepository;
 
 @Entity
 public class Receita {
@@ -60,4 +63,21 @@ public class Receita {
 	public void setData(LocalDate data) {
 		this.data = data;
 	}
+
+	public boolean isDuplicada(ReceitaRepository receitaRepository) {
+		List<Receita> receitaList = receitaRepository.findByDescricao(descricao);
+		if(!receitaList.isEmpty()) {
+			return receitaList.stream().filter(this::isMesmoMes).findAny().isPresent();
+		}
+		return false;
+	}
+
+	private boolean isMesmoMes(Receita receita) {
+		if(this.data.getYear() != (receita.getData().getYear())) {
+			return false;
+		}
+
+		return this.data.getMonth().getValue() == receita.getData().getMonth().getValue();
+	}
+
 }
