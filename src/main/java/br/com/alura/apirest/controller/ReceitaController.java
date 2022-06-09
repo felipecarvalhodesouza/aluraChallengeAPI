@@ -2,6 +2,7 @@ package br.com.alura.apirest.controller;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
@@ -9,6 +10,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,10 +44,20 @@ public class ReceitaController {
 		URI uri = uriBuilder.path("/receitas/{id}").buildAndExpand(receita.getId()).toUri();
 		return ResponseEntity.created(uri).body(receita);
 	}
-	
+
 	@GetMapping
 	public List<ReceitaDTO> buscarTodasAsReceitas() {
 			List<Receita> receitas = receitaRepository.findAll();
 			return ReceitaDTO.converter(receitas);
+	}
+
+	@GetMapping("/{id}")
+	public ResponseEntity<ReceitaDTO> buscarReceita(@PathVariable Long id) {
+		Optional<Receita> receita = receitaRepository.findById(id);
+		if (receita.isPresent()) {
+			return ResponseEntity.ok(new ReceitaDTO(receita.get()));
+		}
+
+		return ResponseEntity.notFound().build();
 	}
 }
