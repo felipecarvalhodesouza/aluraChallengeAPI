@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import br.com.alura.apirest.modelo.Receita;
 
-public interface ReceitaRepository extends JpaRepository<Receita, Long>{
+public interface ReceitaRepository extends JpaRepository<Receita, Long> {
 	
 	List<Receita> findByDescricao(String descricao);
 }
