@@ -30,7 +30,7 @@ public class Despesa extends Movimentacao implements Duplicavel{
 	@Override
 	public boolean isDuplicada(JpaRepository<?, Long> repository) {
 		DespesaRepository despesaRepository = (DespesaRepository) repository;
-		List<Despesa> despresaList = despesaRepository.findByDescricao(getDescricao());
+		List<Despesa> despresaList = despesaRepository.findByDescricaoIgnoreCase(getDescricao());
 		if (!despresaList.isEmpty()) {
 			return despresaList.stream().filter(this::isMesmoMes).findAny().isPresent();
 		}

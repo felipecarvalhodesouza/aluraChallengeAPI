@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -48,9 +49,12 @@ public class DespesaController {
 	}
 
 	@GetMapping
-	public List<DespesaDTO> buscarTodasAsDespesas() {
-			List<Despesa> despesas = despesaRepository.findAll();
-			return DespesaDTO.converter(despesas);
+	public List<DespesaDTO> buscarTodasAsDespesas(@RequestParam(required = false) String descricao) {
+		if(descricao == null) {
+			return DespesaDTO.converter(despesaRepository.findAll());
+		}
+		
+		return DespesaDTO.converter(despesaRepository.findByDescricaoIgnoreCaseLike(descricao));
 	}
 
 	@GetMapping("/{id}")
