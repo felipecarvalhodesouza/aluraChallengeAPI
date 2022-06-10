@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import br.com.alura.apirest.exception.MovimentacaoDuplicadaException;
 import br.com.alura.apirest.exception.ReceitaDuplicadaNoMesException;
 
 @RestControllerAdvice
@@ -40,14 +41,14 @@ public class ValidationHandler{
 		return dto;
 	}
 	
-    @ExceptionHandler(ReceitaDuplicadaNoMesException.class)
-    public ResponseEntity<?> handleResourceNotFoundException(ReceitaDuplicadaNoMesException rdnme, HttpServletRequest request) {
+    @ExceptionHandler(MovimentacaoDuplicadaException.class)
+    public ResponseEntity<?> handleResourceNotFoundException(MovimentacaoDuplicadaException mdnme, HttpServletRequest request) {
 
         ErrorDetail errorDetail = new ErrorDetail();
         errorDetail.setTimestamp(new Date().getTime());
         errorDetail.setStatus(HttpStatus.BAD_REQUEST.value());
-        errorDetail.setTitle("Erro na validação de receita.");
-        errorDetail.setDetail(rdnme.getMessage());
+        errorDetail.setTitle(mdnme.getTitle());
+        errorDetail.setDetail(mdnme.getMessage());
 
         return new ResponseEntity<>(errorDetail, null, HttpStatus.BAD_REQUEST);
     }

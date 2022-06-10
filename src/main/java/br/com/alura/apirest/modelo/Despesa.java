@@ -2,52 +2,32 @@ package br.com.alura.apirest.modelo;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import br.com.alura.apirest.repository.DespesaRepository;
 
 @Entity
-public class Despesa {
+public class Despesa extends Movimentacao implements Duplicavel{
 	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	public Despesa() {
+		super();
+	}
 	
-	private String descricao;
-	private BigDecimal valor;
-	private LocalDate data;
-
-	public long getId() {
-		return id;
+	public Despesa(String descricao,BigDecimal valor, LocalDate data) {
+		super(descricao, valor, data);
 	}
 
-	public void setId(long id) {
-		this.id = id;
-	}
-
-	public String getDescricao() {
-		return descricao;
-	}
-
-	public void setDescricao(String descricao) {
-		this.descricao = descricao;
-	}
-
-	public BigDecimal getValor() {
-		return valor;
-	}
-
-	public void setValor(BigDecimal valor) {
-		this.valor = valor;
-	}
-
-	public LocalDate getData() {
-		return data;
-	}
-
-	public void setData(LocalDate data) {
-		this.data = data;
+	@Override
+	public boolean isDuplicada(JpaRepository<?, Long> repository) {
+		DespesaRepository despesaRepository = (DespesaRepository) repository;
+		List<Despesa> despresaList = despesaRepository.findByDescricao(getDescricao());
+		if (!despresaList.isEmpty()) {
+			return despresaList.stream().filter(this::isMesmoMes).findAny().isPresent();
+		}
+		return false;
 	}
 }
