@@ -12,11 +12,13 @@ public class DespesaDTO {
 	private String descricao;
 	private BigDecimal valor;
 	private String data;
+	private String categoria;
 
 	public DespesaDTO(Despesa despesa) {
 		this.descricao = despesa.getDescricao();
 		this.valor = despesa.getValor();
 		this.data = Utils.toString(despesa.getData());
+		this.categoria = despesa.getCategoria().getDescricaoCategoria();
 	}
 
 	public String getDescricao() {
@@ -41,6 +43,14 @@ public class DespesaDTO {
 
 	public void setData(String data) {
 		this.data = data;
+	}
+
+	public String getCategoria() {
+		return categoria;
+	}
+
+	public void setCategoria(String categoria) {
+		this.categoria = categoria;
 	}
 
 	public static List<DespesaDTO> converter(List<Despesa> despesas) {

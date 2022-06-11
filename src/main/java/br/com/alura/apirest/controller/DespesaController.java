@@ -1,14 +1,20 @@
 package br.com.alura.apirest.controller;
 
 import java.net.URI;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -25,6 +32,7 @@ import br.com.alura.apirest.exception.DespesaDuplicadaNoMesException;
 import br.com.alura.apirest.modelo.Despesa;
 import br.com.alura.apirest.repository.DespesaRepository;
 
+@Validated
 @RestController
 @RequestMapping("/despesas")
 public class DespesaController {
@@ -48,9 +56,12 @@ public class DespesaController {
 	}
 
 	@GetMapping
-	public List<DespesaDTO> buscarTodasAsDespesas() {
-			List<Despesa> despesas = despesaRepository.findAll();
-			return DespesaDTO.converter(despesas);
+	public List<DespesaDTO> buscarTodasAsDespesas(@RequestParam(required = false) String descricao) {
+		if(descricao == null) {
+			return DespesaDTO.converter(despesaRepository.findAll());
+		}
+		
+		return DespesaDTO.converter(despesaRepository.findByDescricaoIgnoreCaseLike(descricao));
 	}
 
 	@GetMapping("/{id}")
@@ -61,6 +72,19 @@ public class DespesaController {
 		}
 
 		return ResponseEntity.notFound().build();
+	}
+	
+	@GetMapping("/{ano}/{mes}")
+	public List<DespesaDTO> buscarDespesasPorMesEAno(@PathVariable  @NotNull
+																	@Min(message = "Ano não pode ser menor que 1970", value = 1970)
+																	@Max(message = "Ano não pode ser maior que 2199", value = 2199) int ano,
+													 @PathVariable  @NotNull
+													 				@Min(message = "Mês não pode ser menor que 1", value = 1)
+																	@Max(message = "Mês não pode ser maior que 12", value = 12) int mes) {
+		LocalDate primeiroDiaDoMes = LocalDate.of(ano, mes, 1),
+				  ultimoDiaDoMes   = primeiroDiaDoMes.with(TemporalAdjusters.lastDayOfMonth());
+		
+		return DespesaDTO.converter(despesaRepository.getTodasDespesasDeUmMes(primeiroDiaDoMes, ultimoDiaDoMes));
 	}
 	
 	@PutMapping("/{id}")

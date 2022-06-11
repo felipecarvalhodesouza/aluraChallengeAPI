@@ -24,7 +24,7 @@ public class Receita extends Movimentacao implements Duplicavel{
 	@Override
 	public boolean isDuplicada(JpaRepository<?, Long> repository) {
 		ReceitaRepository receitaRepository = (ReceitaRepository) repository;
-		List<Receita> receitaList = receitaRepository.findByDescricao(getDescricao());
+		List<Receita> receitaList = receitaRepository.findByDescricaoIgnoreCase(getDescricao());
 		if (!receitaList.isEmpty()) {
 			return receitaList.stream().filter(this::isMesmoMes).findAny().isPresent();
 		}
