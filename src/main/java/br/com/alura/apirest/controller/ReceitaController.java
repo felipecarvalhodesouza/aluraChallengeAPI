@@ -74,7 +74,6 @@ public class ReceitaController {
 		return ResponseEntity.notFound().build();
 	}
 	
-	@Validated
 	@GetMapping("/{ano}/{mes}")
 	public List<ReceitaDTO> buscarReceitasPorMesEAno(@PathVariable  @NotNull
 																	@Min(message = "Ano não pode ser menor que 1970", value = 1970)
