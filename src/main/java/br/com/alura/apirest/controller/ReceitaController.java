@@ -1,14 +1,20 @@
 package br.com.alura.apirest.controller;
 
 import java.net.URI;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +34,7 @@ import br.com.alura.apirest.repository.ReceitaRepository;
 
 @RestController
 @RequestMapping("/receitas")
+@Validated
 public class ReceitaController {
 
 	@Autowired
@@ -65,6 +72,20 @@ public class ReceitaController {
 		}
 
 		return ResponseEntity.notFound().build();
+	}
+	
+	@Validated
+	@GetMapping("/{ano}/{mes}")
+	public List<ReceitaDTO> buscarReceitasPorMesEAno(@PathVariable  @NotNull
+																	@Min(message = "Ano não pode ser menor que 1970", value = 1970)
+																	@Max(message = "Ano não pode ser maior que 2199", value = 2199) int ano,
+													 @PathVariable  @NotNull
+													 				@Min(message = "Mês não pode ser menor que 1", value = 1)
+																	@Max(message = "Mês não pode ser maior que 12", value = 12) int mes) {
+		LocalDate primeiroDiaDoMes = LocalDate.of(ano, mes, 1),
+				  ultimoDiaDoMes   = primeiroDiaDoMes.with(TemporalAdjusters.lastDayOfMonth());
+		
+		return ReceitaDTO.converter(receitaRepository.getTodasReceitasDeUmMes(primeiroDiaDoMes, ultimoDiaDoMes));
 	}
 	
 	@PutMapping("/{id}")

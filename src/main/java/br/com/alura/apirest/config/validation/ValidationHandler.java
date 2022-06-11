@@ -3,8 +3,13 @@ package br.com.alura.apirest.config.validation;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Path;
+import javax.validation.Path.Node;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -16,9 +21,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import br.com.alura.apirest.exception.MovimentacaoDuplicadaException;
-import br.com.alura.apirest.exception.ReceitaDuplicadaNoMesException;
 
 @RestControllerAdvice
 public class ValidationHandler{
@@ -41,8 +46,9 @@ public class ValidationHandler{
 		return dto;
 	}
 	
+	
     @ExceptionHandler(MovimentacaoDuplicadaException.class)
-    public ResponseEntity<?> handleResourceNotFoundException(MovimentacaoDuplicadaException mdnme, HttpServletRequest request) {
+    public ResponseEntity<?> handleMovimentacaoDuplicadaException(MovimentacaoDuplicadaException mdnme, HttpServletRequest request) {
 
         ErrorDetail errorDetail = new ErrorDetail();
         errorDetail.setTimestamp(new Date().getTime());
@@ -52,5 +58,38 @@ public class ValidationHandler{
 
         return new ResponseEntity<>(errorDetail, null, HttpStatus.BAD_REQUEST);
     }
+	
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<?> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException mdnme, HttpServletRequest request) {
+
+        ErrorDetail errorDetail = new ErrorDetail();
+        errorDetail.setTimestamp(new Date().getTime());
+        errorDetail.setStatus(HttpStatus.BAD_REQUEST.value());
+        errorDetail.setTitle("Erro no tipo de parâmetro enviado");
+        errorDetail.setDetail("Foi verificado que os tipos de parâmetros enviados não correspondem aos esperados pela API. Favor revisar a requisição");
+
+        return new ResponseEntity<>(errorDetail, null, HttpStatus.BAD_REQUEST);
+    }
+    
+	@ResponseStatus(code = HttpStatus.BAD_REQUEST)
+	@ExceptionHandler(ConstraintViolationException.class)
+	public List<ErroDeFormularioDto> handle(ConstraintViolationException exception) {
+		List<ErroDeFormularioDto> dto = new ArrayList<>();
+		
+		dto.addAll(exception.getConstraintViolations().stream()
+													  .map(this::getErroFromViolation)
+													  .collect(Collectors.toList()));
+		return dto;
+	}
+	
+	private ErroDeFormularioDto getErroFromViolation(ConstraintViolation<?> violation) {
+		Path propertyPath = violation.getPropertyPath();
+		for (Node node : propertyPath) {
+			if("mes".equalsIgnoreCase(node.getName()) || "ano".equalsIgnoreCase(node.getName())) {
+				return new ErroDeFormularioDto(node.getName(), violation.getMessage());	
+			}
+		}
+		return new ErroDeFormularioDto(propertyPath.toString(), violation.getMessage());
+	}
 
 }
