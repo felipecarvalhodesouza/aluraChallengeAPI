@@ -32,6 +32,7 @@ public class SecurityConfigurations {
 		http
 			.authorizeHttpRequests((authorize) -> authorize
 				.antMatchers("/login", "/auth").permitAll()
+			    .antMatchers("/**.html", "/v2/api-docs", "/webjars/**","/configuration/**", "/swagger-resources/**").permitAll()
 				.anyRequest().authenticated()
 			)
 			.authenticationManager(getAuthenticationManager(http))
